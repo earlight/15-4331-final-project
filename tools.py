@@ -51,7 +51,6 @@ def get_WRDS():
     data = rename_WRDS(data)
     data = remove_R_WRDS(data)
     data = convert_date_WRDS(data)
-    print(data)
     return data
 
 get_WRDS()
