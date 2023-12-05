@@ -120,7 +120,7 @@ SECTOR_EQUITY_CATEGORIES = {
     "PRNEX": "Natural Resources",
     "CSRIX": "Real Estate",
     "FSPTX": "Technology",
-    # "FKUQX": "Utilities"
+    "FKUQX": "Utilities"
 }
 TAXABLE_BOND_CATEGORIES = {
     "FFRHX": "Bank Loan",
@@ -182,15 +182,15 @@ for ticker, category in US_EQUITY_CATEGORIES.items():
     ALL_CATEGORIES[ticker] = "US Equity: " + category
 
 # set print display options
-pd.set_option('display.max_columns', None)
-pd.set_option('expand_frame_repr', False)
+pd.set_option('display.max_columns', 0)
+pd.set_option('expand_frame_repr', True)
 
 # import data from WRDS mutual fund monthly returns
 def read_mutual_fund_data():
     data = pd.read_csv("mutual_fund_data.csv",skiprows=0).dropna(how='any')
     return data
 
-# rename and drop columns in WRDS data
+# rename and drop columns in mutual fund data
 def rename_mutual_fund_data(data):
     data = data.copy()
     data = data.rename(
@@ -203,7 +203,7 @@ def rename_mutual_fund_data(data):
     data = data.drop(columns=["crsp_fundno"])
     return data
 
-# remove invalid rows in WRDS data
+# remove invalid rows in mutual fund data
 def remove_rows_mutual_fund_data(data):
     data = data.copy()
 
@@ -214,13 +214,13 @@ def remove_rows_mutual_fund_data(data):
     data = data.reset_index(drop=True)
     return data
 
-# convert date column into datetime format in WRDS data
+# convert date column into datetime format in mutual fund data
 def convert_date_mutual_fund_data(data):
     data = data.copy()
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
     return data
 
-# split WRDS dataframe by ticker
+# split mutual fund dataframe by ticker
 def split_mutual_fund_data(data):
     data = data.copy()
     
@@ -230,22 +230,24 @@ def split_mutual_fund_data(data):
     for ticker, category in ALL_CATEGORIES.items():
 
         # filter data by ticker
-        ticker_data = data[data['ticker'] == ticker]
+        ticker_data = data[data['ticker'] == ticker].copy()
         ticker_data = ticker_data.reset_index(drop=True)
         split_data[category] = ticker_data
 
         # update total rows
         total_rows += len(ticker_data)
 
-        # print warning if less than 10 years of data
-        if len(ticker_data) < 120:
-            print("WARNING: Less than 10 years of data for ", ticker, ", ", category, "(", len(ticker_data), " months)")
+        # print warning if less than 5 years of data
+        if len(ticker_data) < 60:
+            print("WARNING: Less than 5 years of data for ", ticker, ", ", category, "(", len(ticker_data), " months)")
 
-    print("Total number of categories: ", len(split_data))
+    print("Total mutual fund categories: ", len(split_data))
     print("Total number of rows: ", total_rows)
     return split_data
 
+# get and process mutual fund data
 def get_mutual_fund_data():
+    print("\nMutual Fund Data")
     data = read_mutual_fund_data()
     data = rename_mutual_fund_data(data)
     data = remove_rows_mutual_fund_data(data)
@@ -253,4 +255,55 @@ def get_mutual_fund_data():
     data = split_mutual_fund_data(data)
     return data
 
+# import data from WRDS treasury and inflation monthly returns
+def read_bond_data():
+    data = pd.read_csv("bond_data.csv",skiprows=0).dropna(how='any')
+    return data
+
+# rename columns in bond data
+def rename_bond_data(data):
+    data = data.copy()
+    data = data.rename(
+        columns={
+            "caldt": "date",
+            "b30ret": "30 Year Bond Return",
+            "b30ind": "30 Year Bond Index Level",
+            "b20ret": "20 Year Bond Return",
+            "b20ind": "20 Year Bond Index Level",
+            "b10ret": "10 Year Bond Return",
+            "b10ind": "10 Year Bond Index Level",
+            "b7ret": "7 Year Bond Return",
+            "b7ind": "7 Year Bond Index Level",
+            "b5ret": "5 Year Bond Return",
+            "b5ind": "5 Year Bond Index Level",
+            "b2ret": "2 Year Bond Return",
+            "b2ind": "2 Year Bond Index Level",
+            "b1ret": "1 Year Bond Return",
+            "b1ind": "1 Year Bond Index Level",
+            "t90ret": "90 Day Bond Return",
+            "t90ind": "90 Day Bond Index Level",
+            "t30ret": "30 Day Bond Return",
+            "t30ind": "30 Day Bond Index Level",
+            "cpiret": "CPI Return",
+            "cpiind": "CPI Index Level",
+        })
+    data = data.reset_index(drop=True)
+    return data
+
+# convert date column into datetime format in bond data
+def convert_date_bond_data(data):
+    data = data.copy()
+    data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
+    return data
+
+# get bond data
+def get_bond_data():
+    print("\nBond Data")
+    data = read_bond_data()
+    data = rename_bond_data(data)
+    data = convert_date_bond_data(data)
+    print(data)
+    return data
+
 get_mutual_fund_data()
+get_bond_data()
