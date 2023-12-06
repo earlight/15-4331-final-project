@@ -81,6 +81,7 @@ def remove_rows_mutual_fund_data(data):
 def convert_date_mutual_fund_data(data):
     data = data.copy()
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
+    data['date'] = data['date'] + pd.offsets.MonthEnd(0)
     return data
 
 # split mutual fund dataframe by ticker
@@ -157,6 +158,7 @@ def rename_bond_data(data):
 def convert_date_bond_data(data):
     data = data.copy()
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
+    data['date'] = data['date'] + pd.offsets.MonthEnd(0)
     return data
 
 # get bond data
@@ -168,5 +170,17 @@ def get_bond_data():
     print(data)
     return data
 
-get_mutual_fund_data()
-get_bond_data()
+def read_ff_data():
+    data = pd.read_csv("data\F-F_Research_Data_5_Factors_2x3.csv")
+    data = data.rename(columns={'Unnamed: 0': 'date'})
+    return data
+
+def convert_date_ff_data(data):
+    data = data.copy()
+    data['date'] = pd.to_datetime(data['date'], format='%Y%m')
+    data['date'] = data['date'] + pd.offsets.MonthEnd(0)
+    return data
+
+def get_ff_data():
+    data = read_ff_data()
+    return convert_date_ff_data(data)
