@@ -96,8 +96,13 @@ def split_mutual_fund_data(data):
         # filter data by ticker
         ticker_data = data[data['ticker'] == ticker].copy()
         ticker_data = ticker_data.reset_index(drop=True)
+
+        # change dates to be sorted properly
         ticker_data = ticker_data.sort_values(by='date', axis=0)
         ticker_data = ticker_data.reset_index().drop('index', axis=1)
+
+        # add col nav return to find returns of the nav
+        ticker_data['nav_return'] = ticker_data['net_asset_value'].pct_change()
 
         split_data[category] = ticker_data
 
