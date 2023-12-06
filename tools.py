@@ -96,6 +96,9 @@ def split_mutual_fund_data(data):
         # filter data by ticker
         ticker_data = data[data['ticker'] == ticker].copy()
         ticker_data = ticker_data.reset_index(drop=True)
+        ticker_data = ticker_data.sort_values(by='date', axis=0)
+        ticker_data = ticker_data.reset_index().drop('index', axis=1)
+
         split_data[category] = ticker_data
 
         # update total rows
