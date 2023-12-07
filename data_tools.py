@@ -66,10 +66,7 @@ def ff_5(eq_data, ff_df):
         x = sm.add_constant(temp_ff[['Mkt-RF', 'HML', 'SMB', 'RMW', 'CMA']])
         y = type_data['nav_return']*100 - temp_ff['RF']
         model = sm.OLS(y, x).fit(cov_type='HC0')
-        # print(f'Below are the CAPM results for {eq_type}')
-        # print(f"Alpha: {model.params['const']}")
-        # print(f"Beta: {model.params['Mkt-RF']}")
-        # print('\n')
+
 
         alphas.append(model.params['const'])
         betas.append(model.params['Mkt-RF'])
