@@ -104,7 +104,7 @@ def split_mutual_fund_data(data):
         # add col nav return to find returns of the nav
         ticker_data['nav_return'] = ticker_data['net_asset_value'].pct_change()
 
-        split_data[category] = ticker_data
+        split_data[(ticker, category)] = ticker_data
 
         # update total rows
         total_rows += len(ticker_data)
