@@ -1,34 +1,31 @@
 import pandas as pd
 
 # tickers of largest largest active mutual fund by AUM for each morningstar category
-MUTUAL_FUND_CATEGORIES = {
-    ("US Equity", "US Large Value"): ["AMRMX"],
-    ("US Equity", "US Large Blend"): ["AWSHX"],
-    ("US Equity", "US Large Growth"): ["AGTHX"],
-    ("US Equity", "US Mid Value"): ["FLPSX"],
-    ("US Equity", "US Mid Blend"): ["EAASX"],
-    ("US Equity", "US Mid Growth"): ["RPMGX"],
-    ("US Equity", "US Small Value"): ["UBVAX"],
-    ("US Equity", "US Small Blend"): ["PRSVX"],
-    ("US Equity", "US Small Growth"): ["VEXPX"],
-    ("International Equity", "Foreign Large Value"): ["OAYIX"],
-    ("International Equity", "Foreign Large Blend"): ["MDIDX"],
-    ("International Equity", "Foreign Large Growth"): ["AEPGX"],
-    ("International Equity", "Foreign SmallMid Value"): ["OAYEX"],
-    ("International Equity", "Foreign SmallMid Blend"): ["FISMX"],
-    ("International Equity", "Foreign SmallMid Growth"): ["PRIDX"],
-    ("International Equity", "Diversified Emerging Markets"): ["NEWFX"],
-    ("US Fixed Income", "Long-Term Bond"): ["VWESX"],
-    ("US Fixed Income", "Intermediate Core Bond"): ["ABNDX"],
-    ("US Fixed Income", "Intermediate Core-Plus Bond"): ["MWTIX"],
-    ("US Fixed Income", "Short-Term Bond"): ["VFSTX"],
+MUTUAL_FUND_CATEGORIES= {
+    ("US Equity", "Large Value"): [],
+    ("US Equity", "Large Blend"): [],
+    ("US Equity", "Large Growth"): [],
+    ("US Equity", "Mid-Cap Value"): [],
+    ("US Equity", "Mid-Cap Blend"): [],
+    ("US Equity", "Mid-Cap Growth"): [],
+    ("US Equity", "Small Value"): [],
+    ("US Equity", "Small Blend"): [],
+    ("US Equity", "Small Growth"): [],
+    ("International Equity", "Foreign Large Value"): [],
+    ("International Equity", "Foreign Large Blend"): [],
+    ("International Equity", "Foreign Large Growth"): [],
+    ("International Equity", "Foreign SmallMid Value"): [],
+    ("International Equity", "Foreign SmallMid Blend"): [],
+    ("International Equity", "Foreign SmallMid Growth"): [],
+    ("International Equity", "Diversified Emerging Mkts"): [],
+    ("US Fixed Income", "Long-Term Bond"): [],
+    ("US Fixed Income", "Intermediate Core Bond"): [],
+    ("US Fixed Income", "Intermediate Core-Plus Bond"): [],
+    ("US Fixed Income", "Short-Term Bond"): [],
 }
 
-# reverse dictionary so that tickers are keys and categories are values
+# reversed dictionary so that tickers are keys and categories are values
 MUTUAL_FUND_TICKERS = {}
-for category, tickers in MUTUAL_FUND_CATEGORIES.items():
-    for ticker in tickers:
-        MUTUAL_FUND_TICKERS[ticker] = category
 
 # convert benchmark index ticker to morningstar category
 BENCHMARK_INDEX_CATEGORIES = {
@@ -58,9 +55,78 @@ BENCHMARK_INDEX_CATEGORIES = {
 pd.set_option('display.max_columns', None)
 pd.set_option('expand_frame_repr', False)
 
+# import fidelity data of top 100 active funds by AUM for each category
+def read_fidelity_data():
+    
+    fidelity_data = dict()
+    count = 0
+    for asset_class, category in MUTUAL_FUND_CATEGORIES.keys():
+        count += 1
+        data = pd.read_excel("data/mutual_funds/category_largest/" + category + ".xlsx")
+        fidelity_data[(asset_class, category)] = data
+
+    return fidelity_data
+
+# remove last 21 rows of every dataframe
+def remove_rows_fidelity_data(fidelity_data):
+    output_data = dict()
+
+    for key, data in fidelity_data.items():
+        asset_class, category = key
+        data = data.copy()
+        data = data.iloc[:-21]
+        output_data[(asset_class, category)] = data
+
+    return output_data
+
+# add tickers from fidelity data to the MUTUAL_FUND_CATEGORIES dictionary
+def add_tickers_fidelity_data(fidelity_data):
+    for key, data in fidelity_data.items():
+        asset_class, category = key
+        names = data["Name"].tolist()
+        
+        # find the ticker inside parentheses
+        tickers = [ name[name.find("(")+1:name.find(")")] for name in names ]
+        MUTUAL_FUND_CATEGORIES[(asset_class, category)] = tickers
+    
+    # reversed dictionary so that tickers are keys and categories are values
+    for category, tickers in MUTUAL_FUND_CATEGORIES.items():
+        for ticker in tickers:
+            MUTUAL_FUND_TICKERS[ticker] = category
+
+    print("Total number of categories", len(MUTUAL_FUND_CATEGORIES))
+    print("Total number of funds:", len(MUTUAL_FUND_TICKERS))
+
+def create_ticker_file_fidelity_data(fidelity_data):
+    file = open("data/mutual_funds/all_tickers.txt", "w")
+
+    for key, data in fidelity_data.items():
+        asset_class, category = key
+        names = data["Name"].tolist()
+        
+        # find the ticker inside parentheses
+        tickers = [ name[name.find("(")+1:name.find(")")] for name in names ]
+        for ticker in tickers:
+            file.write(ticker + "\n")
+
+    file.close()
+
+    file = open("data/mutual_funds/all_tickers.txt", "r")
+    print("Created ticker file with", len(file.readlines()), "tickers")
+    file.close()
+
+# get fidelity data
+def get_fidelity_data(create_ticker_file=False):
+    fidelity_data = read_fidelity_data()
+    fidelity_data = remove_rows_fidelity_data(fidelity_data)
+    add_tickers_fidelity_data(fidelity_data)
+    if create_ticker_file:
+        create_ticker_file_fidelity_data(fidelity_data)
+
 # import data from WRDS mutual fund monthly returns
 def read_mutual_fund_data():
-    data = pd.read_csv("unused_data/largest_mutual_fund_every_category.csv",skiprows=0).dropna(how='any')
+    # ticker, crsp_fundno, caldt are strings. mtna, mret, mnav are floats
+    data = pd.read_csv("data/mutual_funds/mutual_fund_data.csv",skiprows=0).dropna(how='any')
     return data
 
 # rename and drop columns in mutual fund data
@@ -113,7 +179,7 @@ def split_mutual_fund_data(data):
         ticker_data = ticker_data.reset_index().drop('index', axis=1)
 
         # add col nav return to find returns of the nav
-        ticker_data['nav_return'] = ticker_data['net_asset_value'].pct_change()
+        ticker_data['nav_return'] = ticker_data['net_asset_value'].astype(float).pct_change()
 
         # add ticker data to split data dictionary
         split_data[(ticker, asset_class, category)] = ticker_data
@@ -125,10 +191,9 @@ def split_mutual_fund_data(data):
         if len(ticker_data) < 60:
             print("WARNING: Less than 5 years of data for", ticker, category, "-", len(ticker_data), "months")
 
-    print("Total mutual fund categories:", len(split_data))
-    print("Total mutual funds:", len(MUTUAL_FUND_TICKERS))
     print("Total number of rows:", total_rows)
-    print("Columns:", data.columns)
+    print("Total number of funds:", len(split_data))
+    print("Columns:", split_data[next(iter(split_data))].columns)
     return split_data
 
 # get and process mutual fund data
@@ -249,9 +314,10 @@ def get_index_data():
     data = rename_index_data(data)
     return data
 
+get_fidelity_data()
+# print(MUTUAL_FUND_CATEGORIES)
+# print(MUTUAL_FUND_TICKERS)
 mutual_fund_data = get_mutual_fund_data()
-bond_data = get_bond_data()
-ff_data = get_ff_data()
-index_data = get_index_data()
-print("test")
-print(index_data)
+# bond_data = get_bond_data()
+# ff_data = get_ff_data()
+# index_data = get_index_data()
