@@ -98,4 +98,15 @@ def reg_date_range(eq_data, ff_df, ff_factors, start_date, end_date):
     end_date: date in string
     '''
     results = {}
-    
+    type_data = eq_data.copy()
+    temp_ff = ff_df[(ff_df['date'] >= start_date) & (ff_df['date'] <= end_date)].reset_index().drop('index', axis=1)
+    type_data = type_data[(type_data['date'] >= start_date) & (type_data['date'] <= end_date)].reset_index().drop('index', axis=1)
+
+    x = sm.add_constant(temp_ff[ff_factors])
+    y = type_data['nav_return']*100 - temp_ff['RF']
+    model = sm.OLS(y, x).fit(cov_type='HC0')
+
+    ff_factors.insert(0, 'const')
+    for factor in ff_factors:
+        results[factor]=model.params[factor]
+    return results
