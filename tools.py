@@ -223,6 +223,13 @@ def read_index_data():
             index_data = pd.read_excel("data/representative_benchmarks/" + ticker + ".xlsx", skiprows=5)
         else:
             index_data = pd.read_excel("data/representative_benchmarks/" + ticker + ".xlsx", skiprows=6)
+
+        # Reorganizing index data
+        index_data['Date'] = pd.to_datetime(index_data['Date'], format='%Y-%m-%d')
+        index_data['Date'] = index_data['Date'] + pd.offsets.MonthEnd(0)
+        index_data = index_data.sort_values(by='Date', axis=0)
+        index_data = index_data.reset_index().drop('index', axis=1)
+
         all_index_data[(ticker, asset_class, category, name)] = index_data
     return all_index_data
 
