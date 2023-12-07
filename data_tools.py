@@ -99,3 +99,40 @@ def reg_date_range(eq_data, ff_df, ff_factors, start_date, end_date):
     for factor in ff_factors:
         results[factor]=model.params[factor]
     return results
+
+def capm_index(eq_data, ff_df, index_df, start_date, end_date):
+    '''
+    eq_data: df
+    ff_df: df
+    index_df: list of strings
+    start_date: date in string
+    end_date: date in string
+    '''
+    type_data = eq_data.copy()
+    temp_ff = ff_df[(ff_df['date'] >= start_date) & (ff_df['date'] <= end_date)].reset_index().drop('index', axis=1)
+    type_data = type_data[(type_data['date'] >= start_date) & (type_data['date'] <= end_date)].reset_index().drop('index', axis=1)
+    index_data = index_df[(index_df['Date'] >= start_date) & (index_df['Date'] <= end_date)].reset_index().drop('index', axis=1)
+
+    x = sm.add_constant(index_data['% Change'] - temp_ff['RF'])
+    y = type_data['nav_return']*100 - temp_ff['RF']
+    model = sm.OLS(y, x).fit(cov_type='HC0')
+
+    results = {'const': model.params['const'], 'beta': model.params[0]}
+    return results
+
+def corr_index(eq_data, index_df, start_date, end_date):
+    '''
+    eq_data: df
+    ff_df: df
+    index_df: list of strings
+    start_date: date in string
+    end_date: date in string
+    '''
+    type_data = eq_data.copy()
+    type_data = type_data[(type_data['date'] >= start_date) & (type_data['date'] <= end_date)].reset_index().drop('index', axis=1)
+    index_data = index_df[(index_df['Date'] >= start_date) & (index_df['Date'] <= end_date)].reset_index().drop('index', axis=1)
+
+    index_pct_change = index_data['% Change']
+    mf_pct_change = type_data['nav_return']*100
+
+    return np.corrcoef(index_pct_change, mf_pct_change)[0][1]
