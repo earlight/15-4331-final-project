@@ -32,22 +32,22 @@ for category, tickers in MUTUAL_FUND_CATEGORIES.items():
 
 # convert benchmark index ticker to morningstar category
 BENCHMARK_INDEX_CATEGORIES = {
-    "RU10VATR": ("US Equity", "US Large Value", "Russell 1000 Value TR USD"),
-    "RUITR": ("US Equity", "US Large Blend", "Russell 1000 TR USD"),
-    "RU10GRTR": ("US Equity", "US Large Growth", "Russell 1000 Growth TR USD"),
-    "RUMCVATR": ("US Equity", "US Mid Value", "Russell Mid Cap Value TR USD"),
-    "RMCTR": ("US Equity", "US Mid Blend", "Russell Mid Cap TR USD"),
-    "RUMCGRTR": ("US Equity", "US Mid Growth", "Russell Mid Cap Growth TR USD"),
-    "RUJTR": ("US Equity", "US Small Value", "Russell 2000 Value TR USD"),
-    "RUTTR": ("US Equity", "US Small Blend", "Russell 2000 TR USD"),
-    "RUOTR": ("US Equity", "US Small Growth", "Russell 2000 Growth TR USD"),
+    "RU10VATR": ("US Equity", "Large Value", "Russell 1000 Value TR USD"),
+    "RUITR": ("US Equity", "Large Blend", "Russell 1000 TR USD"),
+    "RU10GRTR": ("US Equity", "Large Growth", "Russell 1000 Growth TR USD"),
+    "RUMCVATR": ("US Equity", "Mid-Cap Value", "Russell Mid Cap Value TR USD"),
+    "RMCTR": ("US Equity", "Mid-Cap Blend", "Russell Mid Cap TR USD"),
+    "RUMCGRTR": ("US Equity", "Mid-Cap Growth", "Russell Mid Cap Growth TR USD"),
+    "RUJTR": ("US Equity", "Small Value", "Russell 2000 Value TR USD"),
+    "RUTTR": ("US Equity", "Small Blend", "Russell 2000 TR USD"),
+    "RUOTR": ("US Equity", "Small Growth", "Russell 2000 Growth TR USD"),
     "MGCUWXUN": ("International Equity", "Foreign Large Value", "MSCI ACWI ex USA Value NR USD"),
     "M1WDU": ("International Equity", "Foreign Large Blend", "MSCI ACWI ex USA NR USD"),
     "M1WDU00G": ("International Equity", "Foreign Large Growth", "MSCI ACWI ex USA Growth NR USD"),
     "M1WDU009": ("International Equity", "Foreign Small/Mid Value", "MSCI ACWI ex USA SMID Value NR USD"),
     "M1WDUSM": ("International Equity", "Foreign Small/Mid Blend", "MSCI ACWI ex USA SMID NR USD"),
     "M1WDU00Z": ("International Equity", "Foreign Small/Mid Growth", "MSCI ACWI ex USA SMID Growth NR USD"),
-    "M1EF": ("International Equity", "Diversified Emerging Markets", "MSCI EM NR USD"),
+    "M1EF": ("International Equity", "Diversified Emerging Mkts", "MSCI EM NR USD"),
     "BFALTRUU": ("US Fixed Income", "Long-Term Bond", "Bloomberg US Government/Credit Long TR USD"),
     "LBUSTRUU": ("US Fixed Income", "Intermediate Core Bond", "Bloomberg US Aggregate Bond TR Index"),
     "LC07TRUU": ("US Fixed Income", "Intermediate Core-Plus Bond", "Bloomberg US Universal Bond TR Index"),
@@ -234,6 +234,7 @@ def rename_index_data(all_index_data):
         data = data.drop(columns=["PX_VOLUME", "Change.1", "% Change.1"]).dropna(how='any')
         print(category, ":", len(data), "months")
     print("Columns:", data.columns)
+    return all_index_data
 
 def get_index_data():
     print("\nIndex Data")
@@ -245,3 +246,5 @@ mutual_fund_data = get_mutual_fund_data()
 bond_data = get_bond_data()
 ff_data = get_ff_data()
 index_data = get_index_data()
+print("test")
+print(index_data)
