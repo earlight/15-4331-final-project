@@ -180,9 +180,6 @@ def split_mutual_fund_data(data):
         ticker_data = ticker_data.sort_values(by='date', axis=0)
         ticker_data = ticker_data.reset_index().drop('index', axis=1)
 
-        # add col nav return to find returns of the nav
-        ticker_data['nav_return'] = ticker_data['net_asset_value'].astype(float).pct_change()
-
         # ignore tickers with no data
         if len(ticker_data) == 0:
             empty_tickers.append((ticker, asset_class, category))
@@ -191,8 +188,11 @@ def split_mutual_fund_data(data):
         elif len(ticker_data) < 60:
             young_tickers.append((ticker, asset_class, category))
 
-        # add ticker data to split data dictionary and update total rows
         else:
+            # add col nav return to find returns of the nav
+            ticker_data['nav_return'] = ticker_data['net_asset_value'].astype(float).pct_change()
+
+            # add ticker data to split data dictionary and update total rows
             split_data[(ticker, asset_class, category)] = ticker_data
             total_rows += len(ticker_data)
     
