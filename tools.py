@@ -167,6 +167,8 @@ def split_mutual_fund_data(data):
     split_data = {}
 
     total_rows = 0
+    empty_tickers = []
+    young_tickers = []
     for ticker, ticker_info in MUTUAL_FUND_TICKERS.items():
         asset_class, category = ticker_info
 
@@ -181,18 +183,23 @@ def split_mutual_fund_data(data):
         # add col nav return to find returns of the nav
         ticker_data['nav_return'] = ticker_data['net_asset_value'].astype(float).pct_change()
 
-        # add ticker data to split data dictionary
-        split_data[(ticker, asset_class, category)] = ticker_data
+        # ignore tickers with no data
+        if len(ticker_data) == 0:
+            empty_tickers.append((ticker, asset_class, category))
 
-        # update total rows
-        total_rows += len(ticker_data)
+        # ignore tickers with less than 5 years of data
+        elif len(ticker_data) < 60:
+            young_tickers.append((ticker, asset_class, category))
 
-        # print warning if less than 5 years of data
-        if len(ticker_data) < 60:
-            print("WARNING: Less than 5 years of data for", ticker, category, "-", len(ticker_data), "months")
-
+        # add ticker data to split data dictionary and update total rows
+        else:
+            split_data[(ticker, asset_class, category)] = ticker_data
+            total_rows += len(ticker_data)
+    
     print("Total number of rows:", total_rows)
-    print("Total number of funds:", len(split_data))
+    print("Total number of funds with enough data:", len(split_data))
+    print("Funds with no data:", len(empty_tickers))
+    print("Funds with less than 5 years of data:", len(young_tickers))
     print("Columns:", split_data[next(iter(split_data))].columns)
     return split_data
 
@@ -315,8 +322,6 @@ def get_index_data():
     return data
 
 get_fidelity_data()
-# print(MUTUAL_FUND_CATEGORIES)
-# print(MUTUAL_FUND_TICKERS)
 mutual_fund_data = get_mutual_fund_data()
 # bond_data = get_bond_data()
 # ff_data = get_ff_data()
