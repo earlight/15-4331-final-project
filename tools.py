@@ -113,8 +113,9 @@ def split_mutual_fund_data(data):
         if len(ticker_data) < 60:
             print("WARNING: Less than 5 years of data for", ticker, category, "-", len(ticker_data), "months")
 
-    print("Total mutual fund categories: ", len(split_data))
-    print("Total number of rows: ", total_rows)
+    print("Total mutual fund categories:", len(split_data))
+    print("Total mutual funds:", len(MUTUAL_FUND_TICKERS))
+    print("Total number of rows:", total_rows)
     return split_data
 
 # get and process mutual fund data
@@ -187,8 +188,14 @@ def convert_date_ff_data(data):
     data = data.copy()
     data['date'] = pd.to_datetime(data['date'], format='%Y%m')
     data['date'] = data['date'] + pd.offsets.MonthEnd(0)
+    print(data)
     return data
 
 def get_ff_data():
+    print("\nFF Data")
     data = read_ff_data()
     return convert_date_ff_data(data)
+
+get_mutual_fund_data()
+get_bond_data()
+get_ff_data()
