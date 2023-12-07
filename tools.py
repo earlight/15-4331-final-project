@@ -67,7 +67,7 @@ pd.set_option('expand_frame_repr', False)
 
 # import data from WRDS mutual fund monthly returns
 def read_mutual_fund_data():
-    data = pd.read_csv("unused_data\largest_mutual_fund_every_category.csv",skiprows=0).dropna(how='any')
+    data = pd.read_csv("unused_data/largest_mutual_fund_every_category.csv",skiprows=0).dropna(how='any')
     return data
 
 # rename and drop columns in mutual fund data
@@ -135,6 +135,7 @@ def split_mutual_fund_data(data):
     print("Total mutual fund categories:", len(split_data))
     print("Total mutual funds:", len(MUTUAL_FUND_TICKERS))
     print("Total number of rows:", total_rows)
+    print("Columns:", data.columns)
     return split_data
 
 # get and process mutual fund data
@@ -149,7 +150,7 @@ def get_mutual_fund_data():
 
 # import data from WRDS treasury and inflation monthly returns
 def read_bond_data():
-    data = pd.read_csv("data\\bond_data.csv",skiprows=0).dropna(how='any')
+    data = pd.read_csv("data/bond_data.csv",skiprows=0).dropna(how='any')
     return data
 
 # rename columns in bond data
@@ -195,12 +196,12 @@ def get_bond_data():
     data = read_bond_data()
     data = rename_bond_data(data)
     data = convert_date_bond_data(data)
-    print(data)
+    print("Columns:", data.columns)
     return data
 
 # import data from fama french monthly returns
 def read_ff_data():
-    data = pd.read_csv("data\F-F_Research_Data_5_Factors_2x3.csv")
+    data = pd.read_csv("data/F-F_Research_Data_5_Factors_2x3.csv")
     data = data.rename(columns={'Unnamed: 0': 'date'})
     return data
 
@@ -238,7 +239,8 @@ def rename_index_data(all_index_data):
         ticker, asset_class, category, name = index
         # drop columns
         data = data.drop(columns=["PX_VOLUME", "Change.1", "% Change.1"]).dropna(how='any')
-        print(category, len(data))
+        print(category, ":", len(data), "months")
+    print("Columns:", data.columns)
 
 def get_index_data():
     print("\nIndex Data")
@@ -246,7 +248,7 @@ def get_index_data():
     data = rename_index_data(data)
     return data
 
-# get_mutual_fund_data()
-# get_bond_data()
-# get_ff_data()
-get_index_data()
+mutual_fund_data = get_mutual_fund_data()
+bond_data = get_bond_data()
+ff_data = get_ff_data()
+index_data = get_index_data()
