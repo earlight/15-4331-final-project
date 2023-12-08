@@ -17,6 +17,10 @@ for mf_key, mf_val in mf_dict.items():
     if mf_key[2] in us_eq_data.keys():
         us_eq_data[mf_key[2]].append(mf_val)
 
+for idx, val in enumerate(us_eq_data['Mid-Cap Growth']):
+    if val['ticker'].iloc[0] == 'DEEVX':
+        del us_eq_data['Mid-Cap Growth'][idx]
+
 us_eq_alphas_c = []
 us_eq_alphas_std_c = []
 us_eq_betas_c = []
@@ -133,6 +137,7 @@ for strat in us_eq_data.keys():
 
 
 def data_analyze_strat_base(strat, strat_name):
+    print('CAPM base measurement')
     fig = plt.figure(figsize=(15,6))
 
     plt.axhspan(us_eq_alphas_c[strat]-us_eq_alphas_std_c[strat], us_eq_alphas_c[strat]+us_eq_alphas_std_c[strat], facecolor='r', alpha=0.5)
@@ -164,6 +169,7 @@ def data_analyze_strat_base(strat, strat_name):
     plt.show()
 
 def data_analyze_strat_bench(strat, strat_name):
+    print('\nCAPM benchmark measurement')
     fig = plt.figure(figsize=(15,6))
 
     plt.axhspan(us_idx_alphas_c[strat]-us_idx_alphas_std_c[strat], us_idx_alphas_c[strat]+us_idx_alphas_std_c[strat], facecolor='r', alpha=0.5)
@@ -204,6 +210,7 @@ def data_analyze_strat_bench(strat, strat_name):
     plt.show()
 
 def data_analyze_strat_5(strat, strat_name):
+    print('\n5-factor measurement')
     fig = plt.figure(figsize=(15,6))
 
     plt.axhspan(np.mean(ind_alphas_5[strat])-np.std(ind_alphas_5[strat]), np.mean(ind_alphas_5[strat])+np.std(ind_alphas_5[strat]), facecolor='r', alpha=0.5)
