@@ -2,26 +2,6 @@ import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 
-def capm(eq_data, ff_df):
-    alphas = []
-    betas = []
-    eq_names = []
-
-    for eq_type, type_data in eq_data.items():
-        start_date = ff_df['date'][0] if ff_df['date'][0] > type_data['date'][1] else type_data['date'][1]
-        end_date = type_data['date'].iloc[-1]
-        temp_ff = ff_df[(ff_df['date'] >= start_date) & (ff_df['date'] <= end_date)].reset_index().drop('index', axis=1)
-        type_data = type_data[type_data['date'] >= start_date].reset_index().drop('index', axis=1)
-
-        x = sm.add_constant(temp_ff['Mkt-RF'])
-        y = type_data['nav_return']*100 - temp_ff['RF']
-        model = sm.OLS(y, x).fit(cov_type='HC0')
-
-        alphas.append(model.params['const'])
-        betas.append(model.params['Mkt-RF'])
-        eq_names.append(eq_type)
-    
-    return alphas, betas, eq_names
 
 def ff_3(eq_data, ff_df):
     alphas = []
@@ -78,6 +58,13 @@ def ff_5(eq_data, ff_df):
     
     return alphas, betas, eq_names, smbs, hmls, rmws, cmas
 
+def capm(eq_data, ff_df):
+
+    start_date = ff_df['date'][0] if ff_df['date'][0] > eq_data['date'][1] else eq_data['date'][1]
+    end_date = eq_data['date'].iloc[-1]
+
+    return reg_date_range(eq_data, ff_df, ['Mkt-RF'], start_date, end_date)
+
 def reg_date_range(eq_data, ff_df, ff_factors, start_date, end_date):
     '''
     eq_data: df
@@ -93,12 +80,14 @@ def reg_date_range(eq_data, ff_df, ff_factors, start_date, end_date):
 
     x = sm.add_constant(temp_ff[ff_factors])
     y = type_data['nav_return']*100 - temp_ff['RF']
-    model = sm.OLS(y, x).fit(cov_type='HC0')
+    if len(temp_ff) == len(type_data):
+        model = sm.OLS(y, x).fit(cov_type='HC0')
 
-    ff_factors.insert(0, 'const')
-    for factor in ff_factors:
-        results[factor]=model.params[factor]
-    return results
+        ff_factors.insert(0, 'const')
+        for factor in ff_factors:
+            results[factor]=model.params[factor]
+        return results
+    return None
 
 def capm_index(eq_data, ff_df, index_df, start_date, end_date):
     '''
