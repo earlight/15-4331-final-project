@@ -261,5 +261,36 @@ def data_analyze_strat_5(strat, strat_name):
     print(f'Average CMA of above stdev alpha is {np.mean(above_std_cma)} with a stdev on CMA of {np.std(above_std_cma)}')
 
 
+def data_analyze_top(strat, strat_name):
+    print('\nTop Mutual Fund')
+    n=1
+    largest_index = sorted(range(len(ind_idx_alphas_c[strat])), key = lambda sub: ind_idx_alphas_c[strat][sub])[-n:]
+    best_alpha_mf = [fund_tickers_idx[strat][i] for i in largest_index] 
+    for mf in us_eq_data[strat_name]:
+        if mf['ticker'].iloc[0] in best_alpha_mf:
+            best_data = mf
+
+    print(f'Best Mutual Fund for {strat_name} is {best_alpha_mf[0]}')
+    start_date = ff_df['date'][0] if ff_df['date'][0] > best_data['date'][1] else best_data['date'][1]
+    start_date = start_date if start_date > us_index[strat_name]['Date'][1] else us_index[strat_name]['Date'][1]
+    end_date = best_data['date'].iloc[-1]
+    capm_result = capm(best_data, ff_df)
+    bench_result = capm_index(best_data, ff_df, us_index[strat_name], start_date, end_date)
+    three_result = reg_date_range(best_data, ff_df, ['Mkt-RF', 'SMB', 'HML'], start_date, end_date)
+    five_result = reg_date_range(best_data, ff_df, ['Mkt-RF', 'SMB', 'HML', 'RMW', 'CMA'], start_date, end_date)   
+    print(f'CAPM regression result is {capm_result}')
+    print(f'Benchmark CAPM regression result is {bench_result}')
+    print(f'3-Factor regression result is {three_result}')
+    print(f'5-Factor regression result is {five_result}')
+
+    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)
+    ax1.bar(['CAPM', 'Benchmark CAPM', '3-Factor', '5-Factor'], [capm_result['const'], bench_result['const'], three_result['const'], five_result['const']])
+    ax2.bar(['CAPM', 'Benchmark CAPM', '3-Factor', '5-Factor'], [capm_result['Mkt-RF'], bench_result['beta'], three_result['Mkt-RF'], five_result['Mkt-RF']])
+    fig.autofmt_xdate(rotation=45)
+    ax1.set_title('Alpha')
+    ax2.set_title('Beta')
+    plt.show()
+
+
 
 
