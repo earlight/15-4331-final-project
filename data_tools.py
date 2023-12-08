@@ -101,13 +101,15 @@ def capm_index(eq_data, ff_df, index_df, start_date, end_date):
     temp_ff = ff_df[(ff_df['date'] >= start_date) & (ff_df['date'] <= end_date)].reset_index().drop('index', axis=1)
     type_data = type_data[(type_data['date'] >= start_date) & (type_data['date'] <= end_date)].reset_index().drop('index', axis=1)
     index_data = index_df[(index_df['Date'] >= start_date) & (index_df['Date'] <= end_date)].reset_index().drop('index', axis=1)
+    
+    if len(temp_ff) == len(type_data) == len(index_data):
+        x = sm.add_constant(index_data['% Change'] - temp_ff['RF'])
+        y = type_data['nav_return']*100 - temp_ff['RF']
+        model = sm.OLS(y, x).fit(cov_type='HC0')
 
-    x = sm.add_constant(index_data['% Change'] - temp_ff['RF'])
-    y = type_data['nav_return']*100 - temp_ff['RF']
-    model = sm.OLS(y, x).fit(cov_type='HC0')
-
-    results = {'const': model.params['const'], 'beta': model.params[0]}
-    return results
+        results = {'const': model.params['const'], 'beta': model.params[0]}
+        return results
+    return None
 
 def corr_index(eq_data, index_df, start_date, end_date):
     '''
