@@ -126,4 +126,6 @@ def corr_index(eq_data, index_df, start_date, end_date):
     index_pct_change = index_data['% Change']
     mf_pct_change = type_data['nav_return']*100
 
-    return np.corrcoef(index_pct_change, mf_pct_change)[0][1]
+    if len(type_data) == len(index_data):
+        return np.corrcoef(index_pct_change, mf_pct_change)[0][1]
+    return None
