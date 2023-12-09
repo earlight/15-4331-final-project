@@ -138,7 +138,7 @@ for strat in us_eq_data.keys():
 
 def data_analyze_strat_base(strat, strat_name):
     print('CAPM base measurement')
-    fig = plt.figure(figsize=(15,6))
+    fig = plt.figure(figsize=(15,4))
 
     plt.axhspan(us_eq_alphas_c[strat]-us_eq_alphas_std_c[strat], us_eq_alphas_c[strat]+us_eq_alphas_std_c[strat], facecolor='r', alpha=0.5)
     plt.bar(fund_tickers[strat], ind_alphas_c[strat])
@@ -170,11 +170,12 @@ def data_analyze_strat_base(strat, strat_name):
 
 def data_analyze_strat_bench(strat, strat_name):
     print('\nCAPM benchmark measurement')
-    fig = plt.figure(figsize=(15,6))
+    fig = plt.figure(figsize=(15,3))
 
     plt.axhspan(us_idx_alphas_c[strat]-us_idx_alphas_std_c[strat], us_idx_alphas_c[strat]+us_idx_alphas_std_c[strat], facecolor='r', alpha=0.5)
     plt.bar(fund_tickers_idx[strat], ind_idx_alphas_c[strat])
     plt.xticks(rotation=90)
+    plt.title(strat_name + ' alpha under CAPM benchmark')
     plt.show()
 
     n=5
@@ -283,12 +284,13 @@ def data_analyze_top(strat, strat_name):
     print(f'3-Factor regression result is {three_result}')
     print(f'5-Factor regression result is {five_result}')
 
-    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)
+    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(10,2))
     ax1.bar(['CAPM', 'Benchmark CAPM', '3-Factor', '5-Factor'], [capm_result['const'], bench_result['const'], three_result['const'], five_result['const']])
     ax2.bar(['CAPM', 'Benchmark CAPM', '3-Factor', '5-Factor'], [capm_result['Mkt-RF'], bench_result['beta'], three_result['Mkt-RF'], five_result['Mkt-RF']])
-    fig.autofmt_xdate(rotation=45)
+    fig.autofmt_xdate(rotation=20)
     ax1.set_title('Alpha')
     ax2.set_title('Beta')
+    fig.suptitle(f'{strat_name} Top Performer: {best_alpha_mf[0]}', y=1.05)
     plt.show()
 
 
